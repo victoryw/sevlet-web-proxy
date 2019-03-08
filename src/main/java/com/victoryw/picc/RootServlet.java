@@ -12,5 +12,5 @@ public abstract class RootServlet extends HttpServlet {
         doProcess(req, resp);
     }
 
-    protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp);
+    protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws IOException;
 }

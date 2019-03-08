@@ -13,6 +13,7 @@
 <body>
     <h1>
         <%= request.getAttribute("key") %>
+        <%= request.getAttribute("username") %>
     </h1>
 </body>
 </html>
