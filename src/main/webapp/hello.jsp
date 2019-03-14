@@ -16,5 +16,16 @@
         <%= request.getAttribute("key") %>
         <%= request.getAttribute("username") %>
     </h1>
+    <form action="/servlet/PostServlet" method="post">
+        First name: <input type="text" name="fname"><br>
+        Last name: <input type="text" name="lname"><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <form action="/servlet/PostServlet" method="get">
+        First name: <input type="text" name="fname"><br>
+        Last name: <input type="text" name="lname"><br>
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>
