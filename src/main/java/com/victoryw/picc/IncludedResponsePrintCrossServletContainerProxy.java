@@ -9,14 +9,14 @@ class IncludedResponsePrintCrossServletContainerProxy {
 
     IncludedResponsePrintCrossServletContainerProxy(final ServletContext servletContext,
                                                     final ServletResponse resp) throws IOException {
-        responsePrintWriter = getResponseWriter(servletContext, resp);
+        responsePrintWriter = createResponseWriter(servletContext, resp);
     }
 
     void println(String outPutString) throws IOException {
         responsePrintWriter.println(outPutString);
     }
 
-    private ResponseWriter getResponseWriter(ServletContext servletContext, ServletResponse resp) throws IOException {
+    private ResponseWriter createResponseWriter(ServletContext servletContext, ServletResponse resp) throws IOException {
         if (servletContext.getServerInfo().contains("jetty")) {
             return new ResponsePrintWriter(resp);
         }
