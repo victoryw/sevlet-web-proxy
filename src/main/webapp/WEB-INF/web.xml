@@ -16,6 +16,15 @@
     </listener>
 
     <filter>
+        <filter-name>RequestLoggingFilter</filter-name> <!-- mandatory -->
+        <filter-class>com.thoughtworks.picc.reverse.proxy.ReverseProxyFilter</filter-class> <!-- mandatory -->
+    </filter>
+    <filter-mapping>
+        <filter-name>RequestLoggingFilter</filter-name> <!-- mandatory -->
+        <url-pattern>/*</url-pattern> <!-- either url-pattern or servlet-name is mandatory -->
+    </filter-mapping>
+
+    <filter>
         <filter-name>springSessionRepositoryFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
@@ -31,14 +40,7 @@
         <load-on-startup>0</load-on-startup>
     </servlet>
 
-    <!--<filter>-->
-        <!--<filter-name>RequestLoggingFilter</filter-name> &lt;!&ndash; mandatory &ndash;&gt;-->
-        <!--<filter-class>com.thoughtworks.picc.reverse.proxy.ReverseProxyFilter</filter-class> &lt;!&ndash; mandatory &ndash;&gt;-->
-    <!--</filter>-->
-    <!--<filter-mapping>-->
-        <!--<filter-name>RequestLoggingFilter</filter-name> &lt;!&ndash; mandatory &ndash;&gt;-->
-        <!--<url-pattern>/*</url-pattern> &lt;!&ndash; either url-pattern or servlet-name is mandatory &ndash;&gt;-->
-    <!--</filter-mapping>-->
+
 
     <servlet-mapping>
         <servlet-name>DefaultServelt</servlet-name>

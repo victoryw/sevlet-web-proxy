@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,6 +23,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,8 +145,7 @@ public class ReverseProxyFilter implements Filter {
 
 
     private Boolean isSetToProxy(HttpServletRequest httpServletRequest) {
-        return httpServletRequest.getRequestURI().endsWith(
-                HelloServlet.class.getName()) ;
+        return httpServletRequest.getRequestURI().endsWith("PostServlet") ;
     }
 
 
@@ -179,9 +180,9 @@ public class ReverseProxyFilter implements Filter {
         if(httpServletRequest.getHeader(CONTENT_LENGTH) != null) {
             final MediaType contentType = MediaType.get(httpServletRequest.getContentType());
             final ServletInputStream bodyStream = httpServletRequest.getInputStream();
-            final byte[]  content = new byte[bodyStream.available()];
-            bodyStream.read(content);
-            body = RequestBody.create(contentType, content);
+            ByteArrayOutputStream cachedBytes = new ByteArrayOutputStream();
+            IOUtils.copy(bodyStream, cachedBytes);
+            body = RequestBody.create(contentType, cachedBytes.toByteArray());
         }
 
         return requestBuilder.method(httpServletRequest.getMethod(), body).build();

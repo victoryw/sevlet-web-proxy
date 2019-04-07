@@ -19,8 +19,8 @@
         <%= request.getAttribute("username") %>
     </h1>
     <form action="/servlet/PostServlet" method="post">
-        First name: <input type="text" name="fname"><br>
-        Last name: <input type="text" name="lname"><br>
+        First name: <input type="text" name="fvname"><br>
+        Last name: <input type="text" name="lvname"><br>
         <input type="submit" value="Submit">
     </form>
 
