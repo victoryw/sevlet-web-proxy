@@ -11,7 +11,9 @@
     <title><%= request.getAttribute("key") %></title>
 </head>
 <body>
-    <h1>it's old</h1>
+    <h1><%= response.hashCode() %></h1>
+
+    <jsp:include page="/servlet/com.victoryw.picc.HelloServlet" />
     <h1>
         <%= request.getAttribute("key") %>
         <%= request.getAttribute("username") %>
@@ -27,5 +29,7 @@
         Last name: <input type="text" name="lname"><br>
         <input type="submit" value="Submit">
     </form>
+
+
 </body>
 </html>

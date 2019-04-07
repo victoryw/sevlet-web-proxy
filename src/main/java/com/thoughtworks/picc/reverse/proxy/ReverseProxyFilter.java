@@ -21,9 +21,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -35,24 +35,6 @@ public class ReverseProxyFilter implements Filter {
     private FilterConfig config;
 
     private static final Log log = LogFactory.getLog(ReverseProxyFilter.class);
-    private ProxyAddress proxyAddress;
-    private String CONTENT_LENGTH = "Content-Length";
-    /**
-     * These are the "hop-by-hop" headers that should not be copied.
-     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
-     * I use an HttpClient HeaderGroup class instead of Set&lt;String&gt; because this
-     * approach does case insensitive lookup faster.
-     */
-    private static final List<String> HOP_BY_HOP_HEADERS = Arrays.asList("CONNECTION", "KEEP-ALIVE", "PROXY-AUTHENTICATE", "PROXY-AUTHORIZATION",
-            "TE", "TRAILERS", "TRANSFER-ENCODING", "UPGRADE");
-
-    private static final List<String> COOKIES_HEADER_NAMES = Arrays.asList(
-            "SET-COOKIE",
-            "SET-COOKIE2");
-
-    private static final List<String> IGNORE_REQUEST_HEADERS = Arrays.asList("HOST", "COOKIE");
-
-    private static final String LOCATION = "Location";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -70,6 +52,7 @@ public class ReverseProxyFilter implements Filter {
         final boolean isInstanceOfHttpServletRequest = request instanceof HttpServletRequest;
         if (!isInstanceOfHttpServletRequest || !isInstanceOfHttpServletResponse) {
             chain.doFilter(request, response);
+            return;
         }
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
@@ -78,15 +61,51 @@ public class ReverseProxyFilter implements Filter {
         Boolean isProxy = isSetToProxy(httpServletRequest);
         if (!isProxy) {
             chain.doFilter(request, response);
+            return;
         }
 
+        final List<Pair<String, String>> extensionHeaders = new ArrayList<>();
         //extract session
+        final HttpSession session = httpServletRequest.getSession(false);
+        if(session != null) {
+            final String sessionValue = HttpSessionHeadConverter.convertSessionAttributeToString(session);
+            extensionHeaders.add(new Pair<>(X_SESSION_HEADER_NAME, sessionValue));
+        }
 
-        completeRequest(httpServletRequest, httpServletResponse);
+        completeRequest(httpServletRequest, httpServletResponse, extensionHeaders);
     }
 
-    private void completeRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
-        Request httpProxyRequest = createProxyRequest(httpServletRequest);
+    @Override
+    public void destroy() {
+
+    }
+
+    //--------------- proxy----------------//
+    private ProxyAddress proxyAddress;
+    private static final String CONTENT_LENGTH = "Content-Length";
+    /**
+     * These are the "hop-by-hop" headers that should not be copied.
+     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
+     * I use an HttpClient HeaderGroup class instead of Set&lt;String&gt; because this
+     * approach does case insensitive lookup faster.
+     */
+    private static final List<String> HOP_BY_HOP_HEADERS = Arrays.asList("CONNECTION", "KEEP-ALIVE", "PROXY-AUTHENTICATE", "PROXY-AUTHORIZATION",
+            "TE", "TRAILERS", "TRANSFER-ENCODING", "UPGRADE");
+
+    private static final List<String> COOKIES_HEADER_NAMES = Arrays.asList(
+            "SET-COOKIE",
+            "SET-COOKIE2");
+
+    private static final List<String> IGNORE_REQUEST_HEADERS = Arrays.asList("HOST");
+
+    private static final String LOCATION = "Location";
+
+    private static final String X_SESSION_HEADER_NAME = "X-Session-Attribute";
+
+    private void completeRequest(HttpServletRequest httpServletRequest,
+                                 HttpServletResponse httpServletResponse,
+                                 List<Pair<String, String>> extensionHeaders) throws IOException {
+        Request httpProxyRequest = createProxyRequest(httpServletRequest, extensionHeaders);
         ///TOOD: client should be static object shared between filter instance
         OkHttpClient client = new OkHttpClient();
         try (final Response proxyResponse = client.newCall(httpProxyRequest).execute()) {
@@ -124,13 +143,13 @@ public class ReverseProxyFilter implements Filter {
 
 
     private Boolean isSetToProxy(HttpServletRequest httpServletRequest) {
-//        return httpServletRequest.getRequestURI().endsWith(
-//                HelloServlet.class.getName()) ;
-        return true;
+        return httpServletRequest.getRequestURI().endsWith(
+                HelloServlet.class.getName()) ;
     }
 
 
-    private Request createProxyRequest(final HttpServletRequest httpServletRequest) throws IOException {
+    private Request createProxyRequest(final HttpServletRequest httpServletRequest,
+                                       List<Pair<String, String>> extensionHeaders) throws IOException {
         final HttpUrl proxyUrl = createProxyUrl(httpServletRequest);
         final Request.Builder requestBuilder = new Request.
                 Builder().
@@ -150,6 +169,9 @@ public class ReverseProxyFilter implements Filter {
         headers.add(new Pair<>("X-Forwarded-For", httpServletRequest.getRemoteAddr()));
         headers.add(new Pair<>("X-Forwarded-Proto", httpServletRequest.getScheme()));
         headers.add(new Pair<>("X-Proxy-With-User", "true"));
+
+        //setExtensionHeader
+        headers.addAll(extensionHeaders);
 
         headers.forEach(pair -> requestBuilder.header(pair.getKey(), pair.getValue()));
 
@@ -177,8 +199,6 @@ public class ReverseProxyFilter implements Filter {
                 build();
     }
 
-    @Override
-    public void destroy() {
 
-    }
 }
+

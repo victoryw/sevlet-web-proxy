@@ -32,6 +32,7 @@ public class DefaultServelt extends HttpServlet {
 
 
         try {
+            final ClassLoader classLoader = Class.class.getClassLoader();
             HttpServlet servlet = (HttpServlet) Class.forName(actionName).newInstance();
             servlet.init(this.getServletConfig());
             servlet.service(req,resp);
@@ -42,7 +43,6 @@ public class DefaultServelt extends HttpServlet {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        super.service(req, resp);
     }
 
     protected String rewriteUrlFromRequest(HttpServletRequest servletRequest) {

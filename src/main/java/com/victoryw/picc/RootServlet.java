@@ -8,9 +8,9 @@ import java.io.IOException;
 
 public abstract class RootServlet extends HttpServlet {
     @Override
-    protected final void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected final void service(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         doProcess(req, resp);
     }
 
-    protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws IOException;
+    protected abstract void doProcess(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException;
 }

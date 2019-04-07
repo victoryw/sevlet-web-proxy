@@ -15,6 +15,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.version>3.2.2.RELEASE</spring.version>
+    <servlet-api.version>2.3</servlet-api.version>
   </properties>
 
   <dependencies>
@@ -23,13 +25,6 @@
       <artifactId>junit</artifactId>
       <version>4.11</version>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -43,7 +38,12 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.0.13</version>
-      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${servlet-api.version}</version>
     </dependency>
 
     <dependency>
@@ -52,6 +52,16 @@
       <version>1.11</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.session</groupId>
+      <artifactId>spring-session-data-redis</artifactId>
+      <version>1.0.2.RELEASE</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -95,7 +105,6 @@
             <httpConnector>
               <port>9000</port>
             </httpConnector>
-            <contextXml>../jetty-web.xml</contextXml>
           </configuration>
         </plugin>
       </plugins>
